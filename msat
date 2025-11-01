@@ -1,0 +1,20 @@
+FILE=$1
+
+if [[ ! $FILE ]]; then 
+  echo "You must specify the input file in .cnf format"
+  exit 1
+fi 
+if [[ ! -f $FILE ]]; then 
+  echo "File $FILE does not exist"
+  exit 1 
+fi 
+
+if [[ ! -d $(pwd)/minisat_data ]]; then 
+  mkdir $(pwd)/minisat_data
+else 
+  chmod 777 $(pwd)/minisat_data
+fi
+
+cp "$FILE" "$(pwd)/minisat_data/input"
+docker run -v "$(pwd)/minisat_data:/app/data" minisat /app/minisat/minisat /app/data/input
+
