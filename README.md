@@ -20,3 +20,10 @@
 Cleanup:
 - `docker rm -f $(docker ps -aq --filter ancestor=minisat)`
 - `docker rmi minisat`
+
+### Compiling minisat
+- `make` and `gcc` are requirements
+```
+cd MiniSat-C_v1.14.1
+make 
+```
