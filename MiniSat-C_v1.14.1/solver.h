@@ -88,6 +88,12 @@ typedef struct stats_t stats;
 // Solver representation:
 
 struct clause_t;
+
+
+
+
+///
+
 typedef struct clause_t clause;
 
 struct solver_t
@@ -115,6 +121,8 @@ struct solver_t
     int*     levels;        //
     lit*     trail;
 
+    lbool* polarity; //Adaugat
+    
     clause*  binary;        // A temporary binary clause
     lbool*   tags;          //
     veci     tagged;        // (contains: var)

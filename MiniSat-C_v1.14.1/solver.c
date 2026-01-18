@@ -356,6 +356,7 @@ void solver_setnvars(solver* s,int n)
         s->levels    = (int*)    realloc(s->levels,   sizeof(int)*s->cap);
         s->tags      = (lbool*)  realloc(s->tags,     sizeof(lbool)*s->cap);
         s->trail     = (lit*)    realloc(s->trail,    sizeof(lit)*s->cap);
+        s->polarity  = (lbool*)  realloc(s->polarity, //sizeof(lbool)*s->cap); //Adaugat
     }
 
     for (var = s->size; var < n; var++){
@@ -367,7 +368,7 @@ void solver_setnvars(solver* s,int n)
         s->reasons  [var] = (clause*)0;
         s->levels   [var] = 0;
         s->tags     [var] = l_Undef;
-        
+       // s->polarity [var] = l_True; //Adaugat
         /* does not hold because variables enqueued at top level will not be reinserted in the heap
            assert(veci_size(&s->order) == var); 
          */
@@ -403,7 +404,7 @@ static inline bool enqueue(solver* s, lit l, clause* from)
         levels [v] = solver_dlevel(s);
         reasons[v] = from;
         s->trail[s->qtail++] = l;
-
+        //s->polarity[v] = sig;//Adaugat
         order_assigned(s, v);
         return true;
     }
@@ -863,7 +864,9 @@ static lbool solver_search(solver* s, int nof_conflicts, int nof_learnts)
 
                 return l_True;
             }
-
+            lbool pref_val = s->polarity[next];
+                        lit decision_lit = (pref_val == l_True) ? toLit(next) : lit_neg(toLit(next));
+            
             assume(s,lit_neg(toLit(next)));
         }
     }
@@ -896,7 +899,7 @@ solver* solver_new(void)
     s->levels    = 0;
     s->tags      = 0;
     s->trail     = 0;
-
+    //s->polarity  = 0; //Adaugat
 
     // initialize other vars
     s->size                   = 0;
@@ -956,7 +959,7 @@ void solver_delete(solver* s)
         int i;
         for (i = 0; i < s->size*2; i++)
             vecp_delete(&s->wlists[i]);
-
+        
         // if one is different from null, all are
         free(s->wlists);
         free(s->activity );
@@ -966,6 +969,7 @@ void solver_delete(solver* s)
         free(s->levels   );
         free(s->trail    );
         free(s->tags     );
+        //free(s->polarity );//Adaugat
     }
 
     free(s);
@@ -1097,24 +1101,25 @@ bool   solver_solve(solver* s, lit* begin, lit* end)
 
     while (status == l_Undef){
         double Ratio = (s->stats.learnts == 0)? 0.0 :
-            s->stats.learnts_literals / (double)s->stats.learnts;
-
+        s->stats.learnts_literals / (double)s->stats.learnts;
+        
         if (s->verbosity >= 1){
-            printf("| %9.0f | %7.0f %8.0f | %7.0f %7.0f %8.0f %7.1f | %6.3f %% |\n", 
-                (double)s->stats.conflicts,
-                (double)s->stats.clauses, 
-                (double)s->stats.clauses_literals,
-                (double)nof_learnts, 
-                (double)s->stats.learnts, 
-                (double)s->stats.learnts_literals,
-                Ratio,
-                s->progress_estimate*100);
+            printf("| %9.0f | %7.0f %8.0f | %7.0f %7.0f %8.0f %7.1f | %6.3f %% |\n",
+                   (double)s->stats.conflicts,
+                   (double)s->stats.clauses,
+                   (double)s->stats.clauses_literals,
+                   (double)nof_learnts,
+                   (double)s->stats.learnts,
+                   (double)s->stats.learnts_literals,
+                   Ratio,
+                   s->progress_estimate*100);
             fflush(stdout);
         }
         status = solver_search(s,(int)nof_conflicts, (int)nof_learnts);
         nof_conflicts *= 1.5;
-        nof_learnts   *= 1.1;
-    }
+        //nof_learnts   *= 1.1;
+       // nof_learnts   *= 1.05;//Adaugat
+        }
     if (s->verbosity >= 1)
         printf("==============================================================================\n");
 
