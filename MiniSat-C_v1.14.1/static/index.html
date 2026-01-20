@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MiniSat Runner</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="bg"></div>
+
+  <header class="header">
+    <div class="brand">
+      <div class="logo">MS</div>
+      <div>
+        <div class="title">MiniSat Runner</div>
+        <div class="subtitle">SAT Benchmarks · Variants · Compare · CSV Export</div>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn secondary" href="/api/results.csv" target="_blank">Download results.csv</a>
+      <button class="btn" id="refresh">Refresh Benchmarks</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="cardTitle">Benchmarks</div>
+      <div class="hint">Selectează un fișier DIMACS (.cnf) și rulează baseline/variant sau compare.</div>
+      <div id="benchList" class="benchList"></div>
+    </section>
+
+    <section class="card">
+      <div class="cardTitle">Run & Compare</div>
+
+      <div class="controls">
+        <div class="control">
+          <div class="k">Variant (Run)</div>
+          <select id="variantSelect" class="select"></select>
+        </div>
+
+        <div class="control">
+          <div class="k">Compare A</div>
+          <select id="compareA" class="select"></select>
+        </div>
+
+        <div class="control">
+          <div class="k">Compare B</div>
+          <select id="compareB" class="select"></select>
+        </div>
+      </div>
+
+      <div class="runMeta" id="runMeta">Select a benchmark from the left.</div>
+
+      <div class="split">
+        <div class="panel">
+          <div class="panelTitle">Metrics (Single Run)</div>
+          <div id="metrics" class="metrics empty">—</div>
+        </div>
+        <div class="panel">
+          <div class="panelTitle">Live Log</div>
+          <pre id="log" class="log empty">—</pre>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:14px;">
+        <div class="panelTitle">Compare Result (A vs B)</div>
+        <div id="compareBox" class="compareBox empty">No comparison yet.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span id="statusDot" class="dot idle"></span>
+    <span id="statusText">Idle</span>
+    <span class="sep">·</span>
+    <span class="muted">Local demo UI for SAT2025 reproduction</span>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
