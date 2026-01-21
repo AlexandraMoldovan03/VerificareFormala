@@ -23,7 +23,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include <assert.h>
 #include <math.h>
 
-#include "solver2.h"
+#include "solver3.h"
 
 //=================================================================================================
 // Debug:
@@ -874,32 +874,6 @@ static lbool solver_search(solver* s, int nof_conflicts, int nof_learnts)
     return l_Undef; // cannot happen
 }
 
-
-//=================================================================================================
-// Luby restart sequence (MiniSat/Glucose style): 1,1,2,1,1,2,4,...
-// Returns the i-th element (1-indexed) of the Luby sequence.
-static int luby(int i)
-{
-    int size = 1;
-    int seq  = 0;
-
-    // Find the smallest size = 2^{seq+1}-1 such that size >= i
-    while (size < i){
-        size = 2*size + 1;
-        seq++;
-    }
-
-    // Descend to locate i
-    while (size - 1 != i - 1){
-        size = (size - 1) >> 1;
-        seq--;
-        i = i % size;
-        if (i == 0) i = size;
-    }
-
-    return 1 << seq;
-}
-
 //=================================================================================================
 // External solver functions:
 
@@ -1095,8 +1069,7 @@ bool   solver_simplify(solver* s)
 
 bool   solver_solve(solver* s, lit* begin, lit* end)
 {
-    int     luby_idx      = 1;
-    int     luby_unit     = 100; // base conflicts between restarts (same starting scale as before)
+    double  nof_conflicts = 100;
     double  nof_learnts   = solver_nclauses(s) / 3;
     lbool   status        = l_Undef;
     lbool*  values        = s->assigns;
@@ -1143,8 +1116,8 @@ bool   solver_solve(solver* s, lit* begin, lit* end)
                 s->progress_estimate*100);
             fflush(stdout);
         }
-        status = solver_search(s, luby(luby_idx) * luby_unit, (int)nof_learnts);
-        luby_idx++;
+        status = solver_search(s,(int)nof_conflicts, (int)nof_learnts);
+        nof_conflicts *= 1.5;
         nof_learnts   *= 1.1;
     }
     if (s->verbosity >= 1)
